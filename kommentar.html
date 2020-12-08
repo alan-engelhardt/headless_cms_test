@@ -114,7 +114,6 @@
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             }
         }
-
     </style>
 </head>
 
@@ -141,6 +140,18 @@
     </article>
     <div id="pre" class=""></div>
     <script>
+        const kommentarUrl = "https://test2-ebca.restdb.io/rest/kommentarer";
+
+        if (sessionStorage.getItem("id")) {
+            const id = sessionStorage.getItem("id");
+            const fornavn = sessionStorage.getItem("fornavn");
+            console.log(id, fornavn);
+            getComments(kommentarUrl);
+        } else {
+            console.log("du er ikke logget ind");
+            window.location.replace("login.html");
+        }
+
         const main = document.querySelector("main");
         const popop = document.querySelector("#popop");
         const pre = document.querySelector("#pre");
@@ -148,7 +159,6 @@
         //const medlemmerUrl = "https://test1-e198.restdb.io/rest/medlemmer";
         const medlemmerUrl = "https://test2-ebca.restdb.io/rest/medlemmer";
         //const kommentarUrl = "https://test1-e198.restdb.io/rest/kommentarer";
-        const kommentarUrl = "https://test2-ebca.restdb.io/rest/kommentarer";
         //const medieurl = "https://test1-e198.restdb.io/media/";
         const medieurl = "https://test2-ebca.restdb.io/media/";
         let kommentarer;
@@ -184,8 +194,6 @@
             const json = await resspons.json();
             vis(json);
         }
-
-        getComments(kommentarUrl);
 
         function vis(data) {
             if (Array.isArray(data)) {
@@ -269,8 +277,5 @@
         }
 
         //getJson(medlemmerUrl)
-
     </script>
-</body>
-
-</html>
+</body></html>

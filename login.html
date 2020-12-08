@@ -78,6 +78,7 @@
                 if (medlem.email == email && medlem.pw == pw) {
                     console.log("du er inde");
                     sessionStorage.setItem("id", medlem._id);
+                    sessionStorage.setItem("fornavn", medlem.fornavn);
                     window.location.replace("kommentar.html");
                 }
             })
