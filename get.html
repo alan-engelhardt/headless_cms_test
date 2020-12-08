@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>get</title>
+</head>
+
+<body>
+    <main></main>
+    <template>
+        <article>
+            <h2></h2>
+            <img>
+        </article>
+    </template>
+    <script>
+        const main = document.querySelector("main");
+        const temp = document.querySelector("template").content;
+        const url = "https://test1-e198.restdb.io/rest/medlemmer";
+        const medieurl = "https://test1-e198.restdb.io/media/";
+
+        async function getJson(url) {
+            const resspons = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-apikey': '5f7ee1835799e648a5a8edf9'
+                }
+            });
+            const json = await resspons.json();
+            vis(json);
+        }
+
+        function vis(data) {
+            console.log(data);
+        }
+
+        getJson(url)
+
+    </script>
+</body>
+
+</html>

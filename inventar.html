@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>inventar</title>
+    <style>
+        img {
+            max-width: 100%;
+            max-height: 90%;
+        }
+
+        article {
+            position: relative;
+            cursor: pointer;
+            padding: 1em;
+            border: 1px solid;
+        }
+
+        #popop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000cc;
+            transition: .5s;
+        }
+
+        #popop div {
+            width: 90vw;
+            height: 80vh;
+            background-color: #FFF;
+            padding: 1em;
+        }
+
+        #pre {
+            position: fixed;
+            top: 50%;
+            left: 46%;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: orange;
+            transform-origin: 50px;
+            animation: roter 1s infinite linear;
+            transition: .5s;
+        }
+
+        @keyframes roter {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hide {
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        #form {
+            padding: 1em;
+            border: 1px solid;
+            width: 10em;
+            margin-top: 1em;
+        }
+
+        input {
+            display: block;
+            margin-bottom: .5em;
+        }
+
+        @media only screen and (min-width: 600px) {
+            body {
+                max-width: 900px;
+                margin: auto;
+            }
+
+            main {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Inventar</h1>
+    <main></main>
+    <template>
+        <article>
+            <h2></h2>
+            <p></p>
+            <p></p>
+        </article>
+    </template>
+    <article id="popop" class="hide">
+        <div>
+            <h2></h2>
+            <p></p>
+            <p></p>
+            <p></p>
+            <p></p>
+        </div>
+    </article>
+    <div id="pre" class=""></div>
+    <div id="form">
+        <h3>Indsæt nyt inventar</h3>
+        Navn: <input type="text" name="navn">
+        Materiale: <input type="text" name="materiale">
+        <!--        Type: <input type="text" name="type">-->
+        Type: <input list="typer" name="type" id="type" placeholder="vælg">
+        <datalist id="typer">
+            <option value="stol">
+            <option value="sofa">
+            <option value="bord">
+        </datalist>
+        Købt: <input type="date" name="dato">
+        Pris: <input type="number" name="pris">
+        <button id="sendForm">Indsend</button>
+    </div>
+    <script>
+        const main = document.querySelector("main");
+        const popop = document.querySelector("#popop");
+        const pre = document.querySelector("#pre");
+        const temp = document.querySelector("template").content;
+        const knap = document.querySelector("#sendForm");
+        const url = "https://test1-e198.restdb.io/rest/inventar";
+        const medieurl = "https://test1-e198.restdb.io/media/";
+
+        knap.addEventListener("click", sendData);
+
+        function sendData() {
+            const nytInv = {
+                navn: document.querySelector("input[name=navn]").value,
+                materiale: document.querySelector("input[name=materiale]").value,
+                type: document.querySelector("input[name=type]").value,
+                anskaffet: document.querySelector("input[name=dato]").value,
+                pris: document.querySelector("input[name=pris]").value
+            }
+            const postData = JSON.stringify(nytInv);
+            console.log(postData);
+            fetch(url, {
+                    method: "post",
+                    headers: {
+                        "Content-Type": "application/json; charset=utf-8",
+                        "x-apikey": "5f7ee1835799e648a5a8edf9",
+                        "cache-control": "no-cache"
+                    },
+                    body: postData
+                })
+                .then(res => res.json())
+                // .then(data => console.log(data));
+                .then(getJson(url))
+        }
+
+        popop.addEventListener("click", () => {
+            popop.classList.add("hide");
+            popop.querySelector("h2").textContent = "";
+        });
+
+        async function getJson(url) {
+            const resspons = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-apikey': '5f7ee1835799e648a5a8edf9'
+                }
+            });
+            const json = await resspons.json();
+            vis(json);
+        }
+
+        function vis(data) {
+            pre.classList.add("hide");
+            if (Array.isArray(data)) {
+                main.textContent = "";
+                data.forEach(element => {
+                    const klon = temp.cloneNode(true);
+                    klon.querySelector("article").addEventListener("click", e => visEnkelt(element._id, e));
+                    klon.querySelector("h2").textContent = element.navn;
+                    klon.querySelector("p").textContent = element.type;
+                    klon.querySelector("p+p").textContent = element.materiale;
+                    main.appendChild(klon)
+                })
+            } else {
+                popop.querySelector("h2").textContent = data.navn;
+                popop.querySelector("p").textContent = data.type;
+                popop.querySelector("p+p").textContent = data.materiale;
+                popop.querySelector("p+p+p").textContent = data.pris + " kr.";
+                popop.querySelector("p+p+p+p").textContent = data.anskaffet;
+                popop.classList.remove("hide");
+            }
+
+        }
+
+        function visEnkelt(id, e) {
+            console.log(e)
+            getJson(url + "/" + id);
+            pre.classList.remove("hide");
+        }
+
+        getJson(url)
+    </script>
+</body></html>

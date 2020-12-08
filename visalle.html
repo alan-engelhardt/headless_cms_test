@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>vis alle</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1em;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>Alle medlemmer</h1>
+    <main></main>
+    <template>
+        <article>
+            <h2></h2>
+            <img>
+        </article>
+    </template>
+    <script>
+        const main = document.querySelector("main");
+        const temp = document.querySelector("template").content;
+        const url = "https://test1-e198.restdb.io/rest/medlemmer";
+        const medieurl = "https://test1-e198.restdb.io/media/";
+
+        async function getJson(url) {
+            const resspons = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-apikey': '5f7ee1835799e648a5a8edf9'
+                }
+            });
+            const json = await resspons.json();
+            vis(json);
+        }
+
+        function vis(data) {
+            data.forEach(medlem => {
+                console.log(medlem);
+                const klon = temp.cloneNode(true);
+                klon.querySelector("article").addEventListener("click", () => visEnkelt(medlem.id));
+                klon.querySelector("h2").textContent = medlem.fornavn;
+                klon.querySelector("img").alt = medlem.fornavn;
+                klon.querySelector("img").src = medieurl + medlem.billede[0];
+                main.appendChild(klon)
+            })
+        }
+
+        function visEnkelt(id) {
+            console.log(id)
+        }
+
+        getJson(url)
+
+    </script>
+</body>
+
+</html>

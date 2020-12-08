@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kommentarer</title>
+    <style>
+        img {
+            max-width: 100%;
+            max-height: 80%;
+        }
+
+        .billedramme {
+            width: 100%;
+            height: 20vh;
+            cursor: pointer;
+            overflow: hidden;
+            margin-bottom: 1em;
+        }
+
+        .indre {
+            width: 100%;
+            height: 100%;
+            transition: .5s;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .indre:hover {
+            transform: scale(1.1);
+        }
+
+        article {
+            position: relative;
+            padding: 1em;
+        }
+
+        .kort {
+            border: 1px solid;
+        }
+
+        h2 {
+            color: orange;
+        }
+
+        .kommentarer p {
+            cursor: pointer;
+        }
+
+        .kommentarer p:hover {
+            color: crimson;
+            text-decoration: underline;
+        }
+
+        #popop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000cc;
+            transition: .5s;
+        }
+
+        #popop div {
+            width: 90vw;
+            height: 80vh;
+            background-color: #FFF;
+            padding: 1em;
+            text-align: center;
+        }
+
+        #pre {
+            position: fixed;
+            top: 50%;
+            left: 46%;
+            width: 40px;
+            height: 40px;
+            border: solid 8px #eee;
+            border-top: solid 8px orange;
+            border-radius: 50%;
+            /*            transform-origin: 50px;*/
+            animation: roter 1s infinite linear;
+            transition: .5s;
+        }
+
+        @keyframes roter {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hide {
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        @media only screen and (min-width: 600px) {
+            body {
+                max-width: 900px;
+                margin: auto;
+            }
+
+            main {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1em;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>Alle medlemmer</h1>
+    <main></main>
+    <template>
+        <article class="kort">
+            <h2></h2>
+            <div class="billedramme">
+                <div class="indre"></div>
+            </div>
+            <section class="kommentarer"></section>
+            <input type="text" name="comment">
+            <button>Send</button>
+        </article>
+    </template>
+    <article id="popop" class="hide">
+        <div>
+            <h2></h2>
+            <p></p>
+            <img>
+        </div>
+    </article>
+    <div id="pre" class=""></div>
+    <script>
+        const main = document.querySelector("main");
+        const popop = document.querySelector("#popop");
+        const pre = document.querySelector("#pre");
+        const temp = document.querySelector("template").content;
+        //const medlemmerUrl = "https://test1-e198.restdb.io/rest/medlemmer";
+        const medlemmerUrl = "https://test2-ebca.restdb.io/rest/medlemmer";
+        //const kommentarUrl = "https://test1-e198.restdb.io/rest/kommentarer";
+        const kommentarUrl = "https://test2-ebca.restdb.io/rest/kommentarer";
+        //const medieurl = "https://test1-e198.restdb.io/media/";
+        const medieurl = "https://test2-ebca.restdb.io/media/";
+        let kommentarer;
+
+        popop.addEventListener("click", () => {
+            popop.classList.add("hide");
+            popop.querySelector("h2").textContent = "";
+            popop.querySelector("img").alt = "";
+            popop.querySelector("img").src = "";
+        });
+
+        async function getComments(url) {
+            const resspons = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-apikey': "5fcf499dff9d67063814034f" //'5f7ee1835799e648a5a8edf9'
+                }
+            });
+            const json = await resspons.json();
+            kommentarer = json;
+            getJson(medlemmerUrl);
+        }
+
+        async function getJson(url) {
+            const resspons = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-apikey': "5fcf499dff9d67063814034f" //'5f7ee1835799e648a5a8edf9'
+                }
+            });
+            const json = await resspons.json();
+            vis(json);
+        }
+
+        getComments(kommentarUrl);
+
+        function vis(data) {
+            if (Array.isArray(data)) {
+                main.textContent = "";
+                data.forEach(medlem => {
+                    const klon = temp.cloneNode(true);
+                    klon.querySelector("article").dataset.m_id = medlem._id;
+                    klon.querySelector(".billedramme").addEventListener("click", e => visEnkelt(medlem._id, e));
+                    klon.querySelector("h2").textContent = medlem.fornavn;
+                    if (medlem.billede) {
+                        //console.log(medlem._id);
+                        klon.querySelector(".indre").style.backgroundImage = "url('" + medieurl + medlem.billede[0];
+                    }
+                    kommentarer.forEach(kommentar => {
+                        if (kommentar.emne_id == medlem._id) {
+                            //console.log(kommentar);
+                            const p = document.createElement("p");
+                            p.textContent = kommentar.navn + ": ";
+                            p.textContent += kommentar.kommentar;
+                            p.dataset.c_id = kommentar._id;
+                            p.addEventListener("click", deleteComment);
+                            klon.querySelector(".kommentarer").appendChild(p);
+                        }
+                    })
+                    klon.querySelector("button").addEventListener("click", addComment);
+                    main.appendChild(klon)
+                })
+            } else {
+                popop.querySelector("h2").textContent = data.fornavn + " " + data.efternavn;
+                popop.querySelector("p").textContent = data.email;
+                popop.querySelector("img").alt = data.fornavn;
+                popop.querySelector("img").src = medieurl + data.billede[0];
+                pre.classList.add("hide");
+                popop.classList.remove("hide");
+            }
+            pre.classList.add("hide");
+        }
+
+        function addComment() {
+            if (this.parentElement.querySelector("input").value != "") {
+                pre.classList.remove("hide");
+                const nyKommentar = {
+                    navn: "Bruger",
+                    kommentar: this.parentElement.querySelector("input").value,
+                    emne_id: this.parentElement.dataset.m_id
+                }
+                const postData = JSON.stringify(nyKommentar);
+                fetch(kommentarUrl, {
+                        method: "post",
+                        headers: {
+                            "Content-Type": "application/json; charset=utf-8",
+                            "x-apikey": "5fcf499dff9d67063814034f",
+                            "cache-control": "no-cache"
+                        },
+                        body: postData
+                    })
+                    .then(res => res.json())
+                    .then(getComments(kommentarUrl));
+            }
+        }
+
+        function deleteComment() {
+            pre.classList.remove("hide");
+            console.log(this.dataset.c_id)
+            fetch(kommentarUrl + "/" + this.dataset.c_id, {
+                    method: "delete",
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'x-apikey': "5fcf499dff9d67063814034f",
+                        "cache-control": "no-cache"
+                    }
+                })
+                .then(res => res.json())
+                .then(getComments(kommentarUrl));
+        }
+
+        function visEnkelt(id, e) {
+            //console.log(e)
+            getJson(medlemmerUrl + "/" + id);
+            pre.classList.remove("hide");
+        }
+
+        //getJson(medlemmerUrl)
+
+    </script>
+</body>
+
+</html>
