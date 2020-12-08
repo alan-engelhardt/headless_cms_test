@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 1em;
+        }
+
+        input {
+            display: block;
+            margin-bottom: .5em;
+        }
+
+        #pre {
+            position: fixed;
+            top: 50%;
+            left: 46%;
+            width: 40px;
+            height: 40px;
+            border: solid 8px #eee;
+            border-top: solid 8px orange;
+            border-radius: 50%;
+            animation: roter 1s infinite linear;
+            transition: .5s;
+            display: none;
+        }
+
+        @keyframes roter {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Login</h1>
+    <div>
+        E-mail:<input type="email">
+        Password:<input type="password">
+        <button>Login</button>
+    </div>
+    <div id="pre" class=""></div>
+    <script>
+        const medlemmerUrl = "https://test2-ebca.restdb.io/rest/medlemmer";
+        const knap = document.querySelector("button");
+        const div = document.querySelector("div");
+        let email, pw;
+
+        knap.addEventListener("click", tjekInput);
+
+        function tjekInput() {
+            pre.style.display = "block";
+            email = document.querySelector("input[type=email]").value;
+            pw = document.querySelector("input[type=password]").value;
+            console.log(email, pw)
+            getJson(medlemmerUrl);
+        }
+
+        async function getJson(url) {
+            const resspons = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-apikey': "5fcf499dff9d67063814034f"
+                }
+            });
+            const json = await resspons.json();
+            tjekBruger(json);
+        }
+
+        function tjekBruger(data) {
+            data.forEach(medlem => {
+                if (medlem.email == email && medlem.pw == pw) {
+                    console.log("du er inde");
+                    sessionStorage.setItem("id", medlem._id);
+                    window.location.replace("kommentar.html");
+                }
+            })
+            pre.style.display = "none";
+        }
+    </script>
+</body></html>
