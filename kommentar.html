@@ -9,6 +9,7 @@
         main {
             display: grid;
             gap: 1em;
+            margin-top: .5em;
         }
 
         img {
@@ -88,7 +89,6 @@
             border: solid 8px #eee;
             border-top: solid 8px orange;
             border-radius: 50%;
-            /*            transform-origin: 50px;*/
             animation: roter 1s infinite linear;
             transition: .5s;
         }
@@ -119,6 +119,7 @@
 
 <body>
     <h1>Alle medlemmer</h1>
+    <button id="logoutBtn">Logout</button>
     <main></main>
     <template>
         <article class="kort">
@@ -140,142 +141,144 @@
     </article>
     <div id="pre" class=""></div>
     <script>
-        const kommentarUrl = "https://test2-ebca.restdb.io/rest/kommentarer";
-
         if (sessionStorage.getItem("id")) {
             const id = sessionStorage.getItem("id");
             const fornavn = sessionStorage.getItem("fornavn");
             console.log(id, fornavn);
+
+            const kommentarUrl = "https://test2-ebca.restdb.io/rest/kommentarer";
+            const logoutBtn = document.querySelector("#logoutBtn");
+            const main = document.querySelector("main");
+            const popop = document.querySelector("#popop");
+            const pre = document.querySelector("#pre");
+            const temp = document.querySelector("template").content;
+            const medlemmerUrl = "https://test2-ebca.restdb.io/rest/medlemmer";
+            const medieurl = "https://test2-ebca.restdb.io/media/";
+            let kommentarer;
             getComments(kommentarUrl);
-        } else {
-            console.log("du er ikke logget ind");
-            window.location.replace("login.html");
-        }
 
-        const main = document.querySelector("main");
-        const popop = document.querySelector("#popop");
-        const pre = document.querySelector("#pre");
-        const temp = document.querySelector("template").content;
-        //const medlemmerUrl = "https://test1-e198.restdb.io/rest/medlemmer";
-        const medlemmerUrl = "https://test2-ebca.restdb.io/rest/medlemmer";
-        //const kommentarUrl = "https://test1-e198.restdb.io/rest/kommentarer";
-        //const medieurl = "https://test1-e198.restdb.io/media/";
-        const medieurl = "https://test2-ebca.restdb.io/media/";
-        let kommentarer;
-
-        popop.addEventListener("click", () => {
-            popop.classList.add("hide");
-            popop.querySelector("h2").textContent = "";
-            popop.querySelector("img").alt = "";
-            popop.querySelector("img").src = "";
-        });
-
-        async function getComments(url) {
-            const resspons = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-apikey': "5fcf499dff9d67063814034f" //'5f7ee1835799e648a5a8edf9'
-                }
+            popop.addEventListener("click", () => {
+                popop.classList.add("hide");
+                popop.querySelector("h2").textContent = "";
+                popop.querySelector("img").alt = "";
+                popop.querySelector("img").src = "";
             });
-            const json = await resspons.json();
-            kommentarer = json;
-            getJson(medlemmerUrl);
-        }
 
-        async function getJson(url) {
-            const resspons = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-apikey': "5fcf499dff9d67063814034f" //'5f7ee1835799e648a5a8edf9'
-                }
-            });
-            const json = await resspons.json();
-            vis(json);
-        }
-
-        function vis(data) {
-            if (Array.isArray(data)) {
-                main.textContent = "";
-                data.forEach(medlem => {
-                    const klon = temp.cloneNode(true);
-                    klon.querySelector("article").dataset.m_id = medlem._id;
-                    klon.querySelector(".billedramme").addEventListener("click", e => visEnkelt(medlem._id, e));
-                    klon.querySelector("h2").textContent = medlem.fornavn;
-                    if (medlem.billede) {
-                        //console.log(medlem._id);
-                        klon.querySelector(".indre").style.backgroundImage = "url('" + medieurl + medlem.billede[0];
+            async function getComments(url) {
+                const resspons = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-apikey': "5fcf499dff9d67063814034f" //'5f7ee1835799e648a5a8edf9'
                     }
-                    kommentarer.forEach(kommentar => {
-                        if (kommentar.emne_id == medlem._id) {
-                            //console.log(kommentar);
-                            const p = document.createElement("p");
-                            p.textContent = kommentar.navn + ": ";
-                            p.textContent += kommentar.kommentar;
-                            p.dataset.c_id = kommentar._id;
-                            p.addEventListener("click", deleteComment);
-                            klon.querySelector(".kommentarer").appendChild(p);
-                        }
-                    })
-                    klon.querySelector("button").addEventListener("click", addComment);
-                    main.appendChild(klon)
-                })
-            } else {
-                popop.querySelector("h2").textContent = data.fornavn + " " + data.efternavn;
-                popop.querySelector("p").textContent = data.email;
-                popop.querySelector("img").alt = data.fornavn;
-                popop.querySelector("img").src = medieurl + data.billede[0];
-                pre.classList.add("hide");
-                popop.classList.remove("hide");
+                });
+                const json = await resspons.json();
+                kommentarer = json;
+                getJson(medlemmerUrl);
             }
-            pre.classList.add("hide");
-        }
 
-        function addComment() {
-            if (this.parentElement.querySelector("input").value != "") {
-                pre.classList.remove("hide");
-                const nyKommentar = {
-                    navn: "Bruger",
-                    kommentar: this.parentElement.querySelector("input").value,
-                    emne_id: this.parentElement.dataset.m_id
+            async function getJson(url) {
+                const resspons = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-apikey': "5fcf499dff9d67063814034f" //'5f7ee1835799e648a5a8edf9'
+                    }
+                });
+                const json = await resspons.json();
+                vis(json);
+            }
+
+            function vis(data) {
+                if (Array.isArray(data)) {
+                    main.textContent = "";
+                    data.forEach(medlem => {
+                        const klon = temp.cloneNode(true);
+                        klon.querySelector("article").dataset.m_id = medlem._id;
+                        klon.querySelector(".billedramme").addEventListener("click", e => visEnkelt(medlem._id, e));
+                        klon.querySelector("h2").textContent = medlem.fornavn;
+                        if (medlem.billede) {
+                            //console.log(medlem._id);
+                            klon.querySelector(".indre").style.backgroundImage = "url('" + medieurl + medlem.billede[0];
+                        }
+                        kommentarer.forEach(kommentar => {
+                            if (kommentar.emne_id == medlem._id) {
+                                //console.log(kommentar);
+                                const p = document.createElement("p");
+                                p.textContent = kommentar.navn + ": ";
+                                p.textContent += kommentar.kommentar;
+                                p.dataset.c_id = kommentar._id;
+                                p.addEventListener("click", deleteComment);
+                                klon.querySelector(".kommentarer").appendChild(p);
+                            }
+                        })
+                        klon.querySelector("button").addEventListener("click", addComment);
+                        main.appendChild(klon)
+                    })
+                } else {
+                    popop.querySelector("h2").textContent = data.fornavn + " " + data.efternavn;
+                    popop.querySelector("p").textContent = data.email;
+                    popop.querySelector("img").alt = data.fornavn;
+                    popop.querySelector("img").src = medieurl + data.billede[0];
+                    pre.classList.add("hide");
+                    popop.classList.remove("hide");
                 }
-                const postData = JSON.stringify(nyKommentar);
-                fetch(kommentarUrl, {
-                        method: "post",
+                pre.classList.add("hide");
+            }
+
+            function addComment() {
+                if (this.parentElement.querySelector("input").value != "") {
+                    pre.classList.remove("hide");
+                    const nyKommentar = {
+                        navn: fornavn,
+                        kommentar: this.parentElement.querySelector("input").value,
+                        emne_id: this.parentElement.dataset.m_id
+                    }
+                    const postData = JSON.stringify(nyKommentar);
+                    fetch(kommentarUrl, {
+                            method: "post",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8",
+                                "x-apikey": "5fcf499dff9d67063814034f",
+                                "cache-control": "no-cache"
+                            },
+                            body: postData
+                        })
+                        .then(res => res.json())
+                        .then(getComments(kommentarUrl));
+                }
+            }
+
+            function deleteComment() {
+                pre.classList.remove("hide");
+                console.log(this.dataset.c_id)
+                fetch(kommentarUrl + "/" + this.dataset.c_id, {
+                        method: "delete",
                         headers: {
-                            "Content-Type": "application/json; charset=utf-8",
-                            "x-apikey": "5fcf499dff9d67063814034f",
+                            'Content-Type': 'application/json; charset=utf-8',
+                            'x-apikey': "5fcf499dff9d67063814034f",
                             "cache-control": "no-cache"
-                        },
-                        body: postData
+                        }
                     })
                     .then(res => res.json())
                     .then(getComments(kommentarUrl));
             }
-        }
 
-        function deleteComment() {
-            pre.classList.remove("hide");
-            console.log(this.dataset.c_id)
-            fetch(kommentarUrl + "/" + this.dataset.c_id, {
-                    method: "delete",
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8',
-                        'x-apikey': "5fcf499dff9d67063814034f",
-                        "cache-control": "no-cache"
-                    }
-                })
-                .then(res => res.json())
-                .then(getComments(kommentarUrl));
-        }
+            function visEnkelt(id, e) {
+                //console.log(e)
+                getJson(medlemmerUrl + "/" + id);
+                pre.classList.remove("hide");
+            }
 
-        function visEnkelt(id, e) {
-            //console.log(e)
-            getJson(medlemmerUrl + "/" + id);
-            pre.classList.remove("hide");
-        }
+            logoutBtn.addEventListener("click", logout);
 
-        //getJson(medlemmerUrl)
+            function logout() {
+                sessionStorage.clear();
+                window.location.replace("login.html");
+            }
+        } else {
+            console.log("du er ikke logget ind");
+            window.location.replace("login.html");
+        }
     </script>
 </body></html>

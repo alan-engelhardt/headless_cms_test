@@ -7,8 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            margin: 1em;
+            margin: 10vw;
         }
+
+        section {}
 
         input {
             display: block;
@@ -34,16 +36,19 @@
                 transform: rotate(360deg);
             }
         }
+
     </style>
 </head>
 
 <body>
-    <h1>Login</h1>
-    <div>
-        E-mail:<input type="email">
-        Password:<input type="password">
-        <button>Login</button>
-    </div>
+    <section>
+        <h1>Login</h1>
+        <div>
+            E-mail:<input type="email">
+            Password:<input type="password">
+            <button>Login</button>
+        </div>
+    </section>
     <div id="pre" class=""></div>
     <script>
         const medlemmerUrl = "https://test2-ebca.restdb.io/rest/medlemmer";
@@ -84,5 +89,8 @@
             })
             pre.style.display = "none";
         }
+
     </script>
-</body></html>
+</body>
+
+</html>
