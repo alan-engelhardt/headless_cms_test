@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>T</title>
+</head>
+
+<body>
+    <script>
+        //const url = "https://graphql.datocms.com/environments/main/preview";
+        const url = "https://graphql.datocms.com/environments/main";
+        const token = "5c81d34f303b29e76b59771d4dc8f4";
+        fetch(
+                'https://graphql.datocms.com/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        //query: '{ medlem { fornavn, efternavn } }'
+                        query: '{ allMedlems { fornavn, efternavn } }'
+                    }),
+                }
+            )
+            .then(res => res.json())
+            .then((res) => {
+                console.log(res.data)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    </script>
+</body></html>

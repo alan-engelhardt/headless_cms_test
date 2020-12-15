@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>vis alle</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1em;
+        }
+
+        img {
+            max-width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Alle medlemmer</h1>
+    <main></main>
+    <template>
+        <article>
+            <h2></h2>
+            <img>
+            <p></p>
+        </article>
+    </template>
+    <script>
+        const main = document.querySelector("main");
+        const temp = document.querySelector("template").content;
+        const url = "https://graphql.datocms.com/environments/main";
+        const token = "5c81d34f303b29e76b59771d4dc8f4";
+        fetch(
+                'https://graphql.datocms.com/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        //query: '{ medlem { fornavn, efternavn } }'
+                        query: '{ allMedlems { fornavn, efternavn, dato } }'
+                    }),
+                }
+            )
+            .then(res => res.json())
+            .then((res) => {
+                console.log(res.data);
+                vis(res.data);
+
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+        function vis(data) {
+            data.allMedlems.forEach(medlem => {
+                console.log(medlem);
+                const klon = temp.cloneNode(true);
+                //klon.querySelector("article").addEventListener("click", () => visEnkelt(medlem.id));
+                klon.querySelector("h2").textContent = medlem.fornavn + " " + medlem.efternavn;
+                klon.querySelector("img").alt = medlem.fornavn;
+                klon.querySelector("p").textContent = medlem.dato;
+                //klon.querySelector("img").src = medieurl + medlem.billede[0];
+                main.appendChild(klon)
+            })
+        }
+
+        function visEnkelt(id) {
+            console.log(id)
+        }
+
+        getJson(url)
+    </script>
+</body></html>
